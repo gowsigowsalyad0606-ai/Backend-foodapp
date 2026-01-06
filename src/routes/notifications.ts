@@ -5,9 +5,8 @@ import { authenticate, AuthRequest } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-/**
- * Register FCM token for push notifications
- */
+
+
 router.post('/register-token', authenticate, async (req: AuthRequest, res: Response) => {
     try {
         const { token } = req.body;
