@@ -1,6 +1,7 @@
 /node_modules/
-package-lock.json
+/dist/
 /logs/
+/uploads/
 .env
 .DS_Store
 firebase-service-account.json
