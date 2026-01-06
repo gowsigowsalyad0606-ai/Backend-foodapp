@@ -20,10 +20,10 @@ export class AuthController {
       }
 
       const { email, password } = req.body;
-      
+
       // Use unified login service
       const result: LoginResponse = await AuthService.login(email, password);
-      
+
       if (result.success) {
         return res.json(result);
       } else {
@@ -51,7 +51,7 @@ export class AuthController {
         });
       }
 
-      const { name, email, password, phone } = req.body;
+      const { name, email, password, phone, role } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
@@ -62,13 +62,16 @@ export class AuthController {
         });
       }
 
-      // Create new user (defaults to 'user' role)
+      // Restrict role selection during open signup
+      const assignedRole = (role === 'delivery') ? 'delivery' : 'user';
+
+      // Create new user
       const user = new User({
         name,
         email,
         password,
-        phone
-        // role is not included - defaults to 'user'
+        phone,
+        role: assignedRole
       });
 
       await user.save();
@@ -208,7 +211,7 @@ export class AuthController {
       }
 
       const result = await AuthService.logout(token);
-      
+
       if (result.success) {
         res.json(result);
       } else {

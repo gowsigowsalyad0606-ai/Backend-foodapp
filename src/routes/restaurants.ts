@@ -419,6 +419,14 @@ router.get('/my-restaurant/stats', authenticate, async (req: AuthRequest, res: R
       status: { $in: ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery'] }
     });
 
+    // Get recent orders for history display
+    const recentOrders = await Order.find({
+      restaurantId: restaurant._id
+    })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('_id total status createdAt');
+
     res.json({
       success: true,
       data: {
@@ -427,7 +435,8 @@ router.get('/my-restaurant/stats', authenticate, async (req: AuthRequest, res: R
         totalOrders,
         totalEarnings: Math.round(totalEarnings),
         avgOrderValue,
-        pendingOrders
+        pendingOrders,
+        recentOrders
       }
     });
   } catch (error: any) {

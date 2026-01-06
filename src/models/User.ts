@@ -16,11 +16,13 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone?: string;
-  role: 'user' | 'admin' | 'restaurant';
+  role: 'user' | 'admin' | 'restaurant' | 'delivery';
   isActive: boolean;
   isVerified: boolean;
   restaurantId?: Types.ObjectId;
   addresses: IAddress[];
+  fcmToken?: string;
+  notificationsEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -54,7 +56,7 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'restaurant'],
+    enum: ['user', 'admin', 'restaurant', 'delivery'],
     default: 'user'
   },
   isActive: {
@@ -90,7 +92,15 @@ const userSchema = new Schema<IUser>({
       type: Boolean,
       default: false
     }
-  }]
+  }],
+  fcmToken: {
+    type: String,
+    default: null
+  },
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
+  }
 }, {
   timestamps: true
 });

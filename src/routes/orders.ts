@@ -3,7 +3,9 @@ import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import Order from '../models/Order';
 import MenuItem from '../models/MenuItem';
+import Restaurant from '../models/Restaurant';
 import { authenticate, authorize, AuthRequest } from '../middleware/authMiddleware';
+import pushNotificationService from '../services/pushNotificationService';
 
 const router = express.Router();
 
@@ -32,13 +34,11 @@ router.get('/my-orders', authenticate, async (req: AuthRequest, res: Response) =
 
     res.json({
       success: true,
-      data: {
-        orders,
-        pagination: {
-          current: Number(page),
-          pages: Math.ceil(total / Number(limit)),
-          total
-        }
+      data: orders,
+      pagination: {
+        current: Number(page),
+        pages: Math.ceil(total / Number(limit)),
+        total
       }
     });
   } catch (error: any) {
@@ -279,10 +279,35 @@ router.post('/', authenticate, [
       paymentMethod,
       specialInstructions,
       estimatedDeliveryTime,
+      status: 'confirmed', // Auto-confirm so riders can see orders immediately
       paymentStatus: paymentMethod.type === 'cash' ? 'pending' : 'paid'
     });
 
     await order.save();
+
+    // Send push notifications for new order
+    try {
+      const restaurant = await Restaurant.findById(restaurantId).select('name ownerId');
+      if (restaurant) {
+        // Notify restaurant owner
+        await pushNotificationService.notifyOrderStatusChange(
+          order._id.toString(),
+          req.user!._id.toString(),
+          restaurant.ownerId?.toString() || null,
+          null,
+          'confirmed',
+          restaurant.name
+        );
+        // Notify all delivery riders about new available order
+        await pushNotificationService.sendToRole('delivery', {
+          title: '🛵 New Order Available!',
+          body: `Pickup from ${restaurant.name}`,
+          data: { type: 'new_order', orderId: order._id.toString() }
+        });
+      }
+    } catch (notifyError) {
+      console.log('Push notification failed (non-critical):', notifyError);
+    }
 
     res.status(201).json({
       success: true,

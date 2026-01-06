@@ -43,6 +43,7 @@ export interface IRestaurant extends Document {
   deliveryFee: number;
   minOrderAmount: number;
   isActive: boolean;
+  reviewCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -177,6 +178,10 @@ const restaurantSchema = new Schema<IRestaurant>({
   isActive: {
     type: Boolean,
     default: true
+  },
+  reviewCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

@@ -1,8 +1,50 @@
 import express from 'express';
 import { authenticate } from '../middleware/authMiddleware';
 import Notification from '../models/Notification';
+import User from '../models/User';
 
 const router = express.Router();
+
+// Register FCM token for push notifications
+router.post('/register-token', authenticate, async (req: any, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: 'FCM token is required' });
+        }
+
+        await User.findByIdAndUpdate(req.user._id, {
+            fcmToken: token,
+            notificationsEnabled: true
+        });
+
+        res.json({ success: true, message: 'FCM token registered successfully' });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Unregister FCM token (logout/disable)
+router.post('/unregister-token', authenticate, async (req: any, res) => {
+    try {
+        await User.findByIdAndUpdate(req.user._id, { fcmToken: null });
+        res.json({ success: true, message: 'FCM token unregistered' });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Toggle notification settings
+router.patch('/settings', authenticate, async (req: any, res) => {
+    try {
+        const { enabled } = req.body;
+        await User.findByIdAndUpdate(req.user._id, { notificationsEnabled: enabled });
+        res.json({ success: true, message: `Notifications ${enabled ? 'enabled' : 'disabled'}` });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // Get unread notifications for the current user
 router.get('/', authenticate, async (req: any, res) => {

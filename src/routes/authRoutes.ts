@@ -16,19 +16,20 @@ router.post('/register', [
   body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
   body('email').trim().isEmail().withMessage('Please provide a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  body('phone').optional().trim().isMobilePhone('any').withMessage('Please provide a valid phone number')
+  body('phone').optional().trim().isMobilePhone('any').withMessage('Please provide a valid phone number'),
+  body('role').optional().isIn(['user', 'delivery']).withMessage('Invalid role specified')
 ], AuthController.register);
 
 // Create admin account (admin only)
-router.post('/create-admin', 
-  authenticate, 
-  adminOnly, 
+router.post('/create-admin',
+  authenticate,
+  adminOnly,
   [
     body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
     body('email').trim().isEmail().withMessage('Please provide a valid email'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('phone').optional().trim().isMobilePhone('any').withMessage('Please provide a valid phone number')
-  ], 
+  ],
   AuthController.createAdmin
 );
 

@@ -145,11 +145,18 @@ export class PaymentController {
                 return res.status(400).json({ success: false, message: 'Order is not paid or lacks payment intent' });
             }
 
+            // Stripe only accepts these specific reason values
+            const validReasons = ['duplicate', 'fraudulent', 'requested_by_customer'] as const;
+            type RefundReason = typeof validReasons[number];
+            const sanitizedReason: RefundReason = validReasons.includes(reason as RefundReason)
+                ? (reason as RefundReason)
+                : 'requested_by_customer';
+
             // Idempotent refund using orderId as idempotency key
             const refund = await stripe.refunds.create(
                 {
                     payment_intent: order.paymentIntentId,
-                    reason: reason || 'requested_by_customer',
+                    reason: sanitizedReason,
                     metadata: { orderId: order._id.toString() },
                 },
                 { idempotencyKey: `refund_${order._id}` }

@@ -592,6 +592,7 @@ router.get('/orders', authenticate, adminOnly, async (req: AuthRequest, res: Res
     const orders = await Order.find(query)
       .populate('userId', 'name email phone')
       .populate('restaurantId', 'name')
+      .populate('deliveryPartnerId', 'name email')
       .sort({ createdAt: -1 })
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));

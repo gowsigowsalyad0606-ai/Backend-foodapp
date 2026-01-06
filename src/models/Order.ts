@@ -16,6 +16,7 @@ export interface IOrderItem {
 export interface IOrder extends Document {
   userId: mongoose.Types.ObjectId;
   restaurantId: mongoose.Types.ObjectId;
+  deliveryPartnerId?: mongoose.Types.ObjectId;
   items: IOrderItem[];
   subtotal: number;
   deliveryFee: number;
@@ -60,6 +61,10 @@ const orderSchema = new Schema<IOrder>({
     type: Schema.Types.ObjectId,
     ref: 'Restaurant',
     required: [true, 'Restaurant ID is required']
+  },
+  deliveryPartnerId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   },
   items: [{
     menuItemId: {

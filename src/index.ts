@@ -18,6 +18,8 @@ import adminRoutes from './routes/admin';
 import categoryRoutes from './routes/categoryRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import deliveryRoutes from './routes/delivery';
+import reviewRoutes from './routes/reviews';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -72,6 +74,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
